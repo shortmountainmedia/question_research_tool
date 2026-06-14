@@ -17,6 +17,8 @@ const platformOptions = [
   { key: 'brave', label: 'Brave' }
 ];
 
+const searchProxy = 'https://r.jina.ai/http://duckduckgo.com/html/?q=';
+
 const questionTemplates = {
   reddit: [
     'Why do Reddit users keep asking about {topic} and what answers are they actually looking for?',
@@ -65,6 +67,46 @@ const questionTemplates = {
 let selectedCount = 20;
 let selectedPlatforms = new Set(platformOptions.map((entry) => entry.key));
 
+function buildSearchQuery(platform, topic) {
+  const safeTopic = topic.trim() || 'this topic';
+
+  switch (platform) {
+    case 'reddit':
+      return `site:reddit.com "${safeTopic}" question`;
+    case 'quora':
+      return `site:quora.com "${safeTopic}" question`;
+    case 'social':
+      return `site:twitter.com OR site:facebook.com OR site:instagram.com "${safeTopic}" question`;
+    case 'google':
+      return `"${safeTopic}" question site:google.com`;
+    case 'bing':
+      return `"${safeTopic}" question site:bing.com`;
+    case 'brave':
+      return `"${safeTopic}" question site:brave.com`;
+    default:
+      return `"${safeTopic}" question`;
+  }
+}
+
+function extractQuestions(text) {
+  const lines = text
+    .split(/\n+/)
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+
+  const startsWithQuestionWord = /^(why|what|how|which|when|where|who|do|can|should|is|are|will|did|does|have|has|could|would|might)/i;
+  const questions = [];
+
+  for (const line of lines) {
+    const cleaned = line.replace(/^[-*•]\s*/, '').replace(/^\d+\.\s*/, '');
+    if (cleaned.includes('?') && startsWithQuestionWord.test(cleaned)) {
+      questions.push(cleaned.replace(/\?\s*$/, '?'));
+    }
+  }
+
+  return [...new Set(questions)].slice(0, 40);
+}
+
 function getPlatformLabels() {
   return selectedPlatforms.size === platformOptions.length
     ? ['all platforms']
@@ -90,41 +132,51 @@ function syncCountButtons() {
   countSummary.textContent = `Generating ${selectedCount} question prompts.`;
 }
 
-function getActiveTemplates() {
+async function fetchLiveQuestions(topic) {
   const activePlatforms = selectedPlatforms.size ? Array.from(selectedPlatforms) : platformOptions.map((entry) => entry.key);
-  const pools = activePlatforms.flatMap((key) => questionTemplates[key] || []);
+  const collected = [];
 
-  if (!pools.length) {
-    return questionTemplates.reddit;
+  for (const platform of activePlatforms) {
+    try {
+      const query = buildSearchQuery(platform, topic);
+      const url = `${searchProxy}${encodeURIComponent(query)}`;
+      const response = await fetch(url);
+      if (!response.ok) continue;
+
+      const text = await response.text();
+      const questions = extractQuestions(text);
+      collected.push(...questions);
+    } catch (error) {
+      console.warn(`Search failed for ${platform}`, error);
+    }
   }
 
-  return pools;
+  return [...new Set(collected)].slice(0, Math.max(selectedCount, 1));
 }
 
-function buildQuestions(topic) {
-  const cleanTopic = topic.trim() || 'this topic';
+async function renderQuestions(topic) {
+  const cleanTopic = topic.trim();
   const labels = getPlatformLabels();
-  const sourceText = labels.join(', ');
-  const pools = getActiveTemplates();
-  const requestedCount = Math.max(selectedCount, 1);
 
-  const expandedTemplates = Array.from({ length: requestedCount }, (_, index) => pools[index % pools.length]);
+  questionGrid.innerHTML = '';
+  emptyState.style.display = 'block';
+  emptyState.innerHTML = '<p>Searching public question results from the selected platforms…</p>';
 
-  return expandedTemplates.map((template, index) => ({
-    title: template.replaceAll('{topic}', cleanTopic),
-    summary: `Research prompt ${index + 1} tailored for ${sourceText}.`
-  }));
-}
+  if (!cleanTopic) {
+    emptyState.innerHTML = '<p>Enter a topic and click “Generate questions” to pull real question ideas from public search results.</p>';
+    return;
+  }
 
-function renderQuestions(topic) {
-  const questions = buildQuestions(topic);
+  const questions = await fetchLiveQuestions(cleanTopic);
+
   questionGrid.innerHTML = '';
   emptyState.style.display = questions.length ? 'none' : 'block';
+  emptyState.innerHTML = '<p>No public question matches were found for that topic yet. Try a broader keyword or select more platforms.</p>';
 
-  questions.forEach((item) => {
+  questions.forEach((question, index) => {
     const card = document.createElement('article');
     card.className = 'card';
-    card.innerHTML = `<strong>${item.title}</strong><p>${item.summary}</p>`;
+    card.innerHTML = `<strong>${question}</strong><p>Question ${index + 1} from ${labels.join(', ')} search results.</p>`;
     questionGrid.appendChild(card);
   });
 }
