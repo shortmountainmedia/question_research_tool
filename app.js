@@ -17,7 +17,9 @@ const platformOptions = [
   { key: 'brave', label: 'Brave' }
 ];
 
-const searchProxy = 'https://r.jina.ai/http://duckduckgo.com/html/?q=';
+const searchProxy = (window.location.hostname.includes('vercel.app') || window.location.hostname === 'localhost')
+  ? '/api/search?q='
+  : 'https://r.jina.ai/http://duckduckgo.com/html/?q=';
 const searchCacheDurationMs = 60 * 60 * 1000;
 const searchRequestDelayMs = 1200;
 
@@ -216,7 +218,8 @@ async function fetchLiveQuestions(topic) {
       }
       if (!response.ok) continue;
 
-      const text = await response.text();
+      const payload = await response.json().catch(() => null);
+      const text = typeof payload?.text === 'string' ? payload.text : await response.text();
       const questions = extractQuestions(text);
       if (questions.length) {
         writeSearchCache(platform, topic, questions);
