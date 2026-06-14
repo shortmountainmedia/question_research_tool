@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="description" content="Generate research prompts and audience question ideas for article planning." />
+    <meta name="description" content="Find real public questions people are asking on Reddit, Quora, social media, and search engines." />
     <title>Question Research Tool</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260614-3" />
+    <link rel="stylesheet" href="styles.css?v=20260614-4" />
   </head>
   <body>
     <main class="app-shell">
@@ -22,8 +22,8 @@
         <p class="eyebrow">Question Research Tool</p>
         <h1>Find real audience questions before you write.</h1>
         <p class="lede">
-          Enter a topic to generate question ideas inspired by Reddit, Quora, social media,
-          and search-engine style phrasing. Use them as article prompts, FAQs, and content briefs.
+          Enter a topic to pull real public questions people are asking on Reddit, Quora,
+          social media, and search engines. Use the results as article ideas, FAQs, and research briefs.
         </p>
       </header>
 
@@ -52,7 +52,7 @@
           <button type="button" class="chip-btn active" data-platform="bing">Bing</button>
           <button type="button" class="chip-btn active" data-platform="brave">Brave</button>
         </div>
-        <p id="platformSummary" class="hint">Using all platforms for question generation.</p>
+        <p id="platformSummary" class="hint">Using all platforms for real public question discovery.</p>
       </section>
 
       <section class="panel chooser-panel">
@@ -67,7 +67,7 @@
           <button type="button" class="chip-btn" data-count="30">30</button>
           <button type="button" class="chip-btn" data-count="40">40</button>
         </div>
-        <p id="countSummary" class="hint">Generating 20 question prompts.</p>
+        <p id="countSummary" class="hint">Generating 20 real public questions.</p>
       </section>
 
       <section id="results" class="panel results-panel" aria-live="polite">
@@ -88,13 +88,13 @@
         <p class="eyebrow">Supported sources</p>
         <ul class="source-list">
           <li>Reddit question threads</li>
-          <li>Quora discussion prompts</li>
-          <li>Social media conversation starters</li>
-          <li>Google / Bing / Brave-style search intents</li>
+          <li>Quora discussion questions</li>
+          <li>Social media conversations</li>
+          <li>Google, Bing, and Brave search results</li>
         </ul>
       </section>
     </main>
 
-    <script src="app.js?v=20260614-3"></script>
+    <script src="app.js?v=20260614-4"></script>
   </body>
 </html>
