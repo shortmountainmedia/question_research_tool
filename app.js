@@ -95,7 +95,6 @@ function extractQuestions(text) {
     .filter(Boolean);
 
   const candidates = [];
-  const questionWord = /^(why|what|how|which|when|where|who|do|can|should|is|are|will|did|does|have|has|could|would|might)/i;
 
   for (const line of lines) {
     const markdownMatch = line.match(/^#{1,6}\s*\[([^\]]+)\]\((https?:\/\/[^)]+)\)/i)
@@ -104,24 +103,23 @@ function extractQuestions(text) {
     const cleaned = (markdownMatch?.[1] || line)
       .replace(/^[-*•]\s*/, '')
       .replace(/^\d+\.\s*/, '')
-      .replace(/\s+/g, ' ')
       .replace(/\*\*/g, '')
       .replace(/`/g, '')
       .replace(/\[.*?\]\(.*?\)/g, '')
       .replace(/\s+/g, ' ')
       .trim();
 
-    if (!cleaned || cleaned.length < 8) continue;
+    const normalized = cleaned
+      .replace(/^[\-–—]\s*/, '')
+      .replace(/\?\s*$/, '?')
+      .replace(/\s+/g, ' ')
+      .trim();
 
-    const normalized = cleaned.replace(/^[\-–—]\s*/, '').replace(/\?\s*$/, '?');
+    if (!normalized || normalized.length < 8) continue;
+    if (/^(Title:|URL Source:|Markdown Content:|No more results found|Suggestions|Feedback|DuckDuckGo|Image \d+)/i.test(normalized)) continue;
+    if (/^(http|https):\/\//i.test(normalized)) continue;
 
-    if (normalized.includes('No more results found') || normalized.includes('Suggestions') || normalized.includes('Feedback')) {
-      continue;
-    }
-
-    if (normalized.includes('?') || questionWord.test(normalized) || /^(how|what|why|which|when|who|where|can|should|is|are|do|does|will|would|could|best|tips|guide|examples?)/i.test(normalized)) {
-      candidates.push(normalized);
-    }
+    candidates.push(normalized);
   }
 
   return [...new Set(candidates)].slice(0, 40);
