@@ -18,6 +18,8 @@ const platformOptions = [
 ];
 
 const searchProxy = 'https://r.jina.ai/http://duckduckgo.com/html/?q=';
+const searchCacheDurationMs = 60 * 60 * 1000;
+const searchRequestDelayMs = 1200;
 
 const questionTemplates = {
   reddit: [
@@ -66,6 +68,40 @@ const questionTemplates = {
 
 let selectedCount = 20;
 let selectedPlatforms = new Set(platformOptions.map((entry) => entry.key));
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getCacheKey(platform, topic) {
+  return `question-search:${platform}:${topic.trim().toLowerCase()}`;
+}
+
+function readSearchCache(platform, topic) {
+  try {
+    const key = getCacheKey(platform, topic);
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+
+    const parsed = JSON.parse(cached);
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.questions)) return null;
+
+    const age = Date.now() - (parsed.timestamp || 0);
+    return age < searchCacheDurationMs ? parsed.questions : null;
+  } catch (error) {
+    console.warn('Search cache read failed', error);
+    return null;
+  }
+}
+
+function writeSearchCache(platform, topic, questions) {
+  try {
+    const key = getCacheKey(platform, topic);
+    localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), questions }));
+  } catch (error) {
+    console.warn('Search cache write failed', error);
+  }
+}
 
 function buildSearchQuery(platform, topic) {
   const safeTopic = topic.trim() || 'this topic';
@@ -155,23 +191,46 @@ function syncCountButtons() {
 async function fetchLiveQuestions(topic) {
   const activePlatforms = selectedPlatforms.size ? Array.from(selectedPlatforms) : platformOptions.map((entry) => entry.key);
   const collected = [];
+  let rateLimited = false;
 
-  for (const platform of activePlatforms) {
+  for (const [index, platform] of activePlatforms.entries()) {
     try {
+      const cached = readSearchCache(platform, topic);
+      if (cached && cached.length) {
+        collected.push(...cached);
+        continue;
+      }
+
       const query = buildSearchQuery(platform, topic);
       const url = `${searchProxy}${encodeURIComponent(query)}`;
-      const response = await fetch(url);
+
+      if (index > 0) {
+        await wait(searchRequestDelayMs);
+      }
+
+      const response = await fetch(url, { cache: 'no-store' });
+      if (response.status === 429 || response.status === 503) {
+        rateLimited = true;
+        console.warn(`Search proxy rate-limited for ${platform}`);
+        continue;
+      }
       if (!response.ok) continue;
 
       const text = await response.text();
       const questions = extractQuestions(text);
+      if (questions.length) {
+        writeSearchCache(platform, topic, questions);
+      }
       collected.push(...questions);
     } catch (error) {
       console.warn(`Search failed for ${platform}`, error);
     }
   }
 
-  return [...new Set(collected)].slice(0, Math.max(selectedCount, 1));
+  return {
+    questions: [...new Set(collected)].slice(0, Math.max(selectedCount, 1)),
+    rateLimited
+  };
 }
 
 async function renderQuestions(topic) {
@@ -187,11 +246,15 @@ async function renderQuestions(topic) {
     return;
   }
 
-  const questions = await fetchLiveQuestions(cleanTopic);
+  const { questions, rateLimited } = await fetchLiveQuestions(cleanTopic);
 
   questionGrid.innerHTML = '';
   emptyState.style.display = questions.length ? 'none' : 'block';
-  emptyState.innerHTML = '<p>No public question matches were found for that topic yet. Try a broader keyword or select more platforms.</p>';
+  if (rateLimited && !questions.length) {
+    emptyState.innerHTML = '<p>The public search proxy is currently rate-limited. Try again in a minute or use a smaller set of platforms.</p>';
+  } else {
+    emptyState.innerHTML = '<p>No public question matches were found for that topic yet. Try a broader keyword or select more platforms.</p>';
+  }
 
   questions.forEach((question, index) => {
     const card = document.createElement('article');
