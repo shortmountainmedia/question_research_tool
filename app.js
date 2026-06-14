@@ -94,17 +94,37 @@ function extractQuestions(text) {
     .map((line) => line.replace(/\s+/g, ' ').trim())
     .filter(Boolean);
 
-  const startsWithQuestionWord = /^(why|what|how|which|when|where|who|do|can|should|is|are|will|did|does|have|has|could|would|might)/i;
-  const questions = [];
+  const candidates = [];
+  const questionWord = /^(why|what|how|which|when|where|who|do|can|should|is|are|will|did|does|have|has|could|would|might)/i;
 
   for (const line of lines) {
-    const cleaned = line.replace(/^[-*•]\s*/, '').replace(/^\d+\.\s*/, '');
-    if (cleaned.includes('?') && startsWithQuestionWord.test(cleaned)) {
-      questions.push(cleaned.replace(/\?\s*$/, '?'));
+    const markdownMatch = line.match(/^#{1,6}\s*\[([^\]]+)\]\((https?:\/\/[^)]+)\)/i)
+      || line.match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)/i);
+
+    const cleaned = (markdownMatch?.[1] || line)
+      .replace(/^[-*•]\s*/, '')
+      .replace(/^\d+\.\s*/, '')
+      .replace(/\s+/g, ' ')
+      .replace(/\*\*/g, '')
+      .replace(/`/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!cleaned || cleaned.length < 8) continue;
+
+    const normalized = cleaned.replace(/^[\-–—]\s*/, '').replace(/\?\s*$/, '?');
+
+    if (normalized.includes('No more results found') || normalized.includes('Suggestions') || normalized.includes('Feedback')) {
+      continue;
+    }
+
+    if (normalized.includes('?') || questionWord.test(normalized) || /^(how|what|why|which|when|who|where|can|should|is|are|do|does|will|would|could|best|tips|guide|examples?)/i.test(normalized)) {
+      candidates.push(normalized);
     }
   }
 
-  return [...new Set(questions)].slice(0, 40);
+  return [...new Set(candidates)].slice(0, 40);
 }
 
 function getPlatformLabels() {
