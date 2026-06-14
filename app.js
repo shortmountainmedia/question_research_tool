@@ -142,14 +142,14 @@ function syncPlatformButtons() {
   });
 
   const labels = getPlatformLabels();
-  platformSummary.textContent = `Using ${labels.join(', ')} for question generation.`;
+  platformSummary.textContent = `Using ${labels.join(', ')} for real public question discovery.`;
 }
 
 function syncCountButtons() {
   countButtons.querySelectorAll('button').forEach((button) => {
     button.classList.toggle('active', Number(button.dataset.count) === selectedCount);
   });
-  countSummary.textContent = `Generating ${selectedCount} question prompts.`;
+  countSummary.textContent = `Generating ${selectedCount} real public questions.`;
 }
 
 async function fetchLiveQuestions(topic) {
@@ -196,7 +196,7 @@ async function renderQuestions(topic) {
   questions.forEach((question, index) => {
     const card = document.createElement('article');
     card.className = 'card';
-    card.innerHTML = `<strong>${question}</strong><p>Question ${index + 1} from ${labels.join(', ')} search results.</p>`;
+    card.innerHTML = `<strong>${question}</strong><p>Question ${index + 1} from live public search results.</p>`;
     questionGrid.appendChild(card);
   });
 }
