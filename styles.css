@@ -50,6 +50,18 @@ button {
 }
 button:hover { filter: brightness(1.04); }
 .ghost-btn { background: rgba(148, 163, 184, 0.14); color: #eff6ff; border: 1px solid rgba(148, 163, 184, 0.2); }
+.chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.chip-btn {
+  background: rgba(30, 41, 59, 0.95);
+  color: #eff6ff;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+.chip-btn.active {
+  background: linear-gradient(135deg, #22d3ee, #818cf8);
+  color: #04111f;
+  border-color: transparent;
+}
+.section-heading { display: flex; justify-content: space-between; align-items: end; gap: 10px; }
 .hint { color: #cbd5e1; font-size: 0.95rem; }
 
 .results-header { display: flex; align-items: end; justify-content: space-between; gap: 14px; }
@@ -65,4 +77,4 @@ button:hover { filter: brightness(1.04); }
 .empty-state { color: #cbd5e1; border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 16px; padding: 18px; }
 .source-list { margin: 8px 0 0 18px; color: #e5eefb; }
 
-@media (max-width: 700px) { .input-row, .results-header { flex-direction: column; align-items: stretch; } }
+@media (max-width: 700px) { .input-row, .results-header, .section-heading { flex-direction: column; align-items: stretch; } }

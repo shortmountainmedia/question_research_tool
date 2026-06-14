@@ -32,6 +32,40 @@
         <p class="hint">Tip: use a narrow topic for better results, such as “email marketing for SaaS” or “remote work productivity.”</p>
       </section>
 
+      <section class="panel chooser-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Platforms</p>
+            <h2>Choose research sources</h2>
+          </div>
+        </div>
+        <div id="platformButtons" class="chip-row">
+          <button type="button" class="chip-btn active" data-platform="all">All platforms</button>
+          <button type="button" class="chip-btn active" data-platform="reddit">Reddit</button>
+          <button type="button" class="chip-btn active" data-platform="quora">Quora</button>
+          <button type="button" class="chip-btn active" data-platform="social">Social media</button>
+          <button type="button" class="chip-btn active" data-platform="google">Google</button>
+          <button type="button" class="chip-btn active" data-platform="bing">Bing</button>
+          <button type="button" class="chip-btn active" data-platform="brave">Brave</button>
+        </div>
+        <p id="platformSummary" class="hint">Using all platforms for question generation.</p>
+      </section>
+
+      <section class="panel chooser-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Volume</p>
+            <h2>Choose question count</h2>
+          </div>
+        </div>
+        <div id="countButtons" class="chip-row">
+          <button type="button" class="chip-btn active" data-count="20">20</button>
+          <button type="button" class="chip-btn" data-count="30">30</button>
+          <button type="button" class="chip-btn" data-count="40">40</button>
+        </div>
+        <p id="countSummary" class="hint">Generating 20 question prompts.</p>
+      </section>
+
       <section id="results" class="panel results-panel" aria-live="polite">
         <div class="results-header">
           <div>
