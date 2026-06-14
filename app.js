@@ -106,8 +106,11 @@ function buildQuestions(topic) {
   const labels = getPlatformLabels();
   const sourceText = labels.join(', ');
   const pools = getActiveTemplates();
+  const requestedCount = Math.max(selectedCount, 1);
 
-  return pools.slice(0, selectedCount).map((template, index) => ({
+  const expandedTemplates = Array.from({ length: requestedCount }, (_, index) => pools[index % pools.length]);
+
+  return expandedTemplates.map((template, index) => ({
     title: template.replaceAll('{topic}', cleanTopic),
     summary: `Research prompt ${index + 1} tailored for ${sourceText}.`
   }));
