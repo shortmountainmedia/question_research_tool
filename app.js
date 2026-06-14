@@ -95,6 +95,7 @@ function extractQuestions(text) {
     .filter(Boolean);
 
   const candidates = [];
+  const startsWithQuestionWord = /^(why|what|how|which|when|where|who|do|can|should|is|are|will|did|does|have|has|could|would|might)/i;
 
   for (const line of lines) {
     const markdownMatch = line.match(/^#{1,6}\s*\[([^\]]+)\]\((https?:\/\/[^)]+)\)/i)
@@ -118,6 +119,7 @@ function extractQuestions(text) {
     if (!normalized || normalized.length < 8) continue;
     if (/^(Title:|URL Source:|Markdown Content:|No more results found|Suggestions|Feedback|DuckDuckGo|Image \d+)/i.test(normalized)) continue;
     if (/^(http|https):\/\//i.test(normalized)) continue;
+    if (!/\?/.test(normalized) && !startsWithQuestionWord.test(normalized)) continue;
 
     candidates.push(normalized);
   }
