@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question Research Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero-card">
+        <p class="eyebrow">Question Research Tool</p>
+        <h1>Find real audience questions before you write.</h1>
+        <p class="lede">
+          Enter a topic to generate question ideas inspired by Reddit, Quora, social media,
+          and search-engine style phrasing. Use them as article prompts, FAQs, and content briefs.
+        </p>
+      </header>
+
+      <section class="panel control-panel">
+        <label for="topicInput">Topic</label>
+        <div class="input-row">
+          <input id="topicInput" type="text" placeholder="e.g. AI for small businesses" />
+          <button id="generateBtn" type="button">Generate questions</button>
+        </div>
+        <p class="hint">Tip: use a narrow topic for better results, such as “email marketing for SaaS” or “remote work productivity.”</p>
+      </section>
+
+      <section id="results" class="panel results-panel" aria-live="polite">
+        <div class="results-header">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h2>Question ideas</h2>
+          </div>
+          <button id="copyBtn" class="ghost-btn" type="button">Copy all</button>
+        </div>
+        <div id="emptyState" class="empty-state">
+          <p>Enter a topic and click “Generate questions” to preview a research brief.</p>
+        </div>
+        <div id="questionGrid" class="question-grid"></div>
+      </section>
+
+      <section class="panel source-panel">
+        <p class="eyebrow">Supported sources</p>
+        <ul class="source-list">
+          <li>Reddit question threads</li>
+          <li>Quora discussion prompts</li>
+          <li>Social media conversation starters</li>
+          <li>Google / Bing / Brave-style search intents</li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
